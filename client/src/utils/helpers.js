@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react';
+
 // Math
 export const mathOp = {
   // Sum an array
@@ -35,3 +37,34 @@ export const colors = {
   wrong: 'lightcoral',
   candidate: 'deepskyblue',
 };
+
+export const useGameState = () => {
+  const [stars, setStars] = useState(mathOp.random(1,9));
+  const [availableNums, setAvailableNums] = useState(mathOp.range(1,9));
+  const [candidateNums, setCandidateNums] = useState([])
+  const [secondsLeft, setSecondsLeft] = useState(10);
+  
+  useEffect(() => {
+    if (secondsLeft > 0 && availableNums.length > 0) {
+      const timerId = setTimeout(() => {
+        setSecondsLeft(secondsLeft - 1)
+      }, 1000)
+      return () => clearTimeout(timerId);
+    }
+  });
+  
+  const setGameState = (newCandidateNums) => {
+    if (mathOp.sum(newCandidateNums) !== stars) {
+      setCandidateNums(newCandidateNums)
+    } else {
+      const newAvailableNums = availableNums.filter(
+        n => !newCandidateNums.includes(n)
+      )
+      setStars(mathOp.randomSumIn(newAvailableNums, 9))
+      setAvailableNums(newAvailableNums);
+      setCandidateNums([])
+    }
+  };
+  
+  return { stars, availableNums, candidateNums, secondsLeft, setGameState };
+}
